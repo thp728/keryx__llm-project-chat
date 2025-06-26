@@ -5,6 +5,10 @@ import os
 # Load environment variables from .env file
 load_dotenv()
 
+# TODO: Import your API routers here when they are created
+# from app.api.v1.endpoints import users, projects, chats
+# from app.api.v1.api import api_router # We'll create this aggregate router later
+
 # Initialize FastAPI app
 app = FastAPI(
     title="Keryx Backend API",
@@ -21,8 +25,8 @@ def read_root():
     return {"message": "Welcome to the Keryx Backend API!"}
 
 
-# TODO: Include API routers here (e.g., app.include_router(api_router, prefix="/api/v1"))
-# This will be done once the api/v1/endpoints are set up.
+# TODO: Include the main API router
+# app.include_router(api_router, prefix="/api/v1")
 
 if __name__ == "__main__":
     import uvicorn
