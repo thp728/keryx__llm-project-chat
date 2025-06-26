@@ -1,36 +1,28 @@
+# server/main.py
+
 from fastapi import FastAPI
-from dotenv import load_dotenv
-import os
+from fastapi.responses import RedirectResponse  # Import RedirectResponse
 
-# Load environment variables from .env file
-load_dotenv()
+from app.api.v1.api import api_router  # Import the aggregated API router
+from app.core.config import settings  # Import your settings for configuration
 
-# TODO: Import your API routers here when they are created
-# from app.api.v1.endpoints import users, projects, chats
-# from app.api.v1.api import api_router # We'll create this aggregate router later
-
-# Initialize FastAPI app
+# Initialize FastAPI app with settings from config.py
 app = FastAPI(
-    title="Keryx Backend API",
+    title=settings.PROJECT_NAME,
     description="API for organizing LLM-based chats by project with common base instructions.",
     version="1.0.0",
+    openapi_url=f"{settings.API_V1_STR}/openapi.json",  # Set OpenAPI URL based on API_V1_STR
 )
 
 
+# Root endpoint to redirect to documentation
 @app.get("/")
-def read_root():
+async def root():  # <--- Changed to async def and uses RedirectResponse
     """
-    Root endpoint to confirm the API is running.
+    Redirects to the OpenAPI (Swagger UI) documentation.
     """
-    return {"message": "Welcome to the Keryx Backend API!"}
+    return RedirectResponse(url="/docs")
 
 
-# TODO: Include the main API router
-# app.include_router(api_router, prefix="/api/v1")
-
-if __name__ == "__main__":
-    import uvicorn
-
-    # Get port from environment variable, default to 8000
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run("main:app", host="0.0.0.0", port=port, reload=True)
+# Include the main API router with the version prefix
+app.include_router(api_router, prefix=settings.API_V1_STR)

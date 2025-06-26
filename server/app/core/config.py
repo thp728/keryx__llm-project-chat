@@ -8,14 +8,22 @@ class Settings(BaseSettings):
     Application settings, loaded from environment variables.
     """
 
+    # Project settings
+    PROJECT_NAME: str = "Keryx Backend API"
+    API_V1_STR: str = "/api/v1"
+
     # Database settings
     DATABASE_URL: str
 
     # LLM and Helicone settings
     GEMINI_API_KEY: str
-    HELICONE_API_KEY: str = (
+    HELICONE_API_KEY: str | None = (  # Use | None for union type hint in Python 3.10+
         None  # Helicone is optional, set to None if not always required
     )
+
+    # JWT Authentication settings
+    SECRET_KEY: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
@@ -27,3 +35,7 @@ def get_settings():
     This ensures settings are loaded only once.
     """
     return Settings()
+
+
+# Create a global settings instance for convenient access
+settings = get_settings()
