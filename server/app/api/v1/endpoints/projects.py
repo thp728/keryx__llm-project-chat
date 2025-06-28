@@ -55,7 +55,7 @@ def read_project(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
-    if project.owner_id != current_user.id and not crud.user.is_superuser(current_user):
+    if project.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to access this project",
@@ -79,7 +79,7 @@ def update_project(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
-    if project.owner_id != current_user.id and not crud.user.is_superuser(current_user):
+    if project.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to update this project",
@@ -103,7 +103,7 @@ def delete_project(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Project not found"
         )
-    if project.owner_id != current_user.id and not crud.user.is_superuser(current_user):
+    if project.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Not enough permissions to delete this project",

@@ -73,7 +73,7 @@ def update_user(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-    # Basic authorization: A user can only update their own profile unless they are a superuser
+    # Basic authorization: A user can only update their own profile
     if user.id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
 
 class UserBase(BaseModel):
@@ -9,16 +9,17 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
+    is_active: Optional[bool] = True
 
 
 class UserUpdate(UserBase):
     password: Optional[str] = None
     is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
 
 
 class UserInDBBase(UserBase):
     id: int
+    is_active: bool
     created_at: datetime
     updated_at: Optional[datetime] = None
 
@@ -31,6 +32,5 @@ class User(UserInDBBase):
     pass
 
 
-# For relationships, you might define simplified schemas to avoid circular imports initially
-# Or, use update_forward_refs() if you need to include nested relationships immediately.
-# For simplicity, we'll keep project/chat schemas separate for now.
+class UserInDB(UserInDBBase):
+    hashed_password: str
