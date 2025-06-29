@@ -16,7 +16,7 @@ from app.db.session import get_db
 
 # OAuth2PasswordBearer is used for extracting the token from the Authorization header
 reusable_oauth2 = OAuth2PasswordBearer(
-    tokenUrl=f"{settings.API_V1_STR}/login/access-token"  # This will be your login endpoint
+    tokenUrl=f"{settings.API_VER_STR}/login/access-token"  # This will be your login endpoint
 )
 
 

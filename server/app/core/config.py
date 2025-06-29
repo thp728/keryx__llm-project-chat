@@ -10,7 +10,7 @@ class Settings(BaseSettings):
 
     # Project settings
     PROJECT_NAME: str = "Keryx Backend API"
-    API_V1_STR: str = "/api/v1"
+    API_VER_STR: str = "/api/v1"
 
     # Database settings
     DATABASE_URL: str

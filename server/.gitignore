@@ -20,5 +20,3 @@ local.env
 
 export_structure.bat
 file_structure.txt
-
-openapi.json
