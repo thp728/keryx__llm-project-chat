@@ -1,5 +1,3 @@
-# server/app/api/deps.py
-
 from typing import (
     Generator,
 )
@@ -14,10 +12,19 @@ from app.core import security
 from app.core.config import settings
 from app.db.session import get_db
 
+from app.services.llm_service import LLMService
+
 # OAuth2PasswordBearer is used for extracting the token from the Authorization header
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_VER_STR}/login/access-token"  # This will be your login endpoint
 )
+
+
+def get_llm_service() -> LLMService:
+    """
+    Provides an instance of LLMService.
+    """
+    return LLMService()
 
 
 def get_current_user(

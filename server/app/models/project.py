@@ -4,8 +4,6 @@ from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.sql import func
 from app.db.base import Base
 
-from .chat import Chat
-
 
 class Project(Base):
     __tablename__ = "projects"
@@ -19,8 +17,8 @@ class Project(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    owner = relationship("User", back_populates="projects")
-    chats: Mapped[List["Chat"]] = relationship(
+    owner: Mapped["User"] = relationship("User", back_populates="projects")  # type: ignore
+    chats: Mapped[List["Chat"]] = relationship(  # type: ignore
         "Chat",
         back_populates="project",
         cascade="all, delete-orphan",

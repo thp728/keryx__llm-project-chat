@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.sql import func
 
 from app.db.base import Base
@@ -16,4 +16,4 @@ class Message(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    chat = relationship("Chat", back_populates="messages")
+    chat: Mapped["Chat"] = relationship("Chat", back_populates="messages")  # type: ignore

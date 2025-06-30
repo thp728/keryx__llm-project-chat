@@ -701,6 +701,68 @@
         }
       }
     },
+    "/api/v1/chats/{chat_id}/message": {
+      "post": {
+        "tags": [
+          "chats"
+        ],
+        "summary": "Post Chat Message",
+        "description": "Receives a new user message for a specific chat, processes it with the LLM,\npersists both user and LLM messages, and returns the LLM's response.",
+        "operationId": "post_chat_message_api_v1_chats__chat_id__message_post",
+        "security": [
+          {
+            "OAuth2PasswordBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "chat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Chat Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserMessageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Post Chat Message Api V1 Chats  Chat Id  Message Post"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/login/access-token": {
       "post": {
         "tags": [
@@ -835,6 +897,14 @@
               }
             ],
             "title": "Updated At"
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/Message"
+            },
+            "type": "array",
+            "title": "Messages",
+            "default": []
           }
         },
         "type": "object",
@@ -894,6 +964,54 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
+      "Message": {
+        "properties": {
+          "role": {
+            "type": "string",
+            "title": "Role",
+            "description": "The role of the message sender (e.g., 'user', 'assistant', 'system')."
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "The actual content of the message."
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "chat_id": {
+            "type": "integer",
+            "title": "Chat Id"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "role",
+          "content",
+          "id",
+          "chat_id",
+          "created_at"
+        ],
+        "title": "Message"
+      },
       "Project": {
         "properties": {
           "name": {
@@ -939,6 +1057,14 @@
               }
             ],
             "title": "Updated At"
+          },
+          "chats": {
+            "items": {
+              "$ref": "#/components/schemas/Chat"
+            },
+            "type": "array",
+            "title": "Chats",
+            "default": []
           }
         },
         "type": "object",
@@ -1109,6 +1235,19 @@
           "password"
         ],
         "title": "UserCreate"
+      },
+      "UserMessageRequest": {
+        "properties": {
+          "message_content": {
+            "type": "string",
+            "title": "Message Content"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message_content"
+        ],
+        "title": "UserMessageRequest"
       },
       "UserUpdate": {
         "properties": {

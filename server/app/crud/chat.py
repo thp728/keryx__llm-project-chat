@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
 from app.models.chat import Chat
+from app.models.message import Message
 from app.schemas.chat import ChatCreate, ChatUpdate
 
 
@@ -32,6 +33,18 @@ class CRUDChat(CRUDBase[Chat, ChatCreate, ChatUpdate]):
             .limit(limit)
             .all()
         )
+
+    def create_message(
+        self, db: Session, chat_id: int, role: str, content: str
+    ) -> Message:
+        """
+        Creates a new message record linked to a specific chat.
+        """
+        db_obj = Message(chat_id=chat_id, role=role, content=content)
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
 
 
 chat = CRUDChat(Chat)

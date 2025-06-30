@@ -1,9 +1,10 @@
-from typing import Any, List
+from typing import Any, List, Dict
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload  # Import joinedload for eager loading
 
-from app import crud, schemas
+from app import models, crud, schemas
 from app.api import deps
+from app.services.llm_service import LLMService  # Import your LLMService
 
 router = APIRouter()
 
@@ -63,14 +64,11 @@ def read_chats(
         )
     else:
         # If no project_id is provided, retrieve all chats for projects owned by the user
-        # This requires an update to crud.chat to get chats by user (via projects)
         user_projects = crud.project.get_multi_by_owner(db=db, owner_id=current_user.id)
         project_ids = [p.id for p in user_projects]
         if not project_ids:
             return []  # No projects, no chats
 
-        # This assumes crud.chat has a method to get chats for a list of project_ids
-        # We'll need to add a `get_multi_by_project_ids` method to crud_chat.py
         chats = crud.chat.get_multi_by_project_ids(
             db=db, project_ids=project_ids, skip=skip, limit=limit
         )
@@ -157,3 +155,73 @@ def delete_chat(
         )
     chat = crud.chat.remove(db, id=chat_id)
     return chat
+
+
+@router.post(
+    "/{chat_id}/message", response_model=Dict[str, str], status_code=status.HTTP_200_OK
+)
+async def post_chat_message(
+    chat_id: int,
+    user_message_request: schemas.UserMessageRequest,
+    db: Session = Depends(deps.get_db),
+    llm_service: LLMService = Depends(deps.get_llm_service),
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Dict[str, str]:
+    """
+    Receives a new user message for a specific chat, processes it with the LLM,
+    persists both user and LLM messages, and returns the LLM's response.
+    """
+    user_message_content = user_message_request.message_content
+
+    # 1. Fetch Chat & Project with messages loaded, ordered by created_at
+    chat = (
+        db.query(models.Chat)
+        .options(
+            joinedload(models.Chat.messages).load_only(
+                models.Message.content, models.Message.role, models.Message.created_at
+            ),
+            joinedload(models.Chat.project).load_only(models.Project.base_instructions),
+        )
+        .filter(models.Chat.id == chat_id)
+        .first()
+    )
+
+    if not chat:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Chat with ID {chat_id} not found.",
+        )
+
+    # Authorization check:
+    if not chat.project or chat.project.owner_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized to access this chat.",
+        )
+
+    # 2. Persist User Message
+    user_message = crud.chat.create_message(
+        db=db, chat_id=chat.id, role="user", content=user_message_content
+    )
+
+    # 3. Invoke LLM Service
+    try:
+        llm_response_content = await llm_service.get_llm_response(
+            new_user_message_content=user_message_content,
+            chat=chat,  # The chat object now has pre-sorted messages
+        )
+    except ValueError as e:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error generating LLM response: {e}",
+        )
+
+    # 4. Persist LLM Response
+    llm_message = crud.chat.create_message(
+        db=db, chat_id=chat.id, role="assistant", content=llm_response_content
+    )
+
+    # 5. Return LLM Response
+    return {"response": llm_response_content}

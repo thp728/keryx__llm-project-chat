@@ -4,8 +4,6 @@ from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.sql import func
 from app.db.base import Base
 
-from .project import Project
-
 
 class User(Base):
     __tablename__ = "users"
@@ -18,4 +16,4 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    projects: Mapped[List["Project"]] = relationship("Project", back_populates="owner")
+    projects: Mapped[List["Project"]] = relationship("Project", back_populates="owner")  # type: ignore
