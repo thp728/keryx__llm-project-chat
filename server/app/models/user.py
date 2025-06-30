@@ -1,7 +1,10 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.orm import relationship
+from typing import List
+from sqlalchemy.orm import relationship, Mapped
 from sqlalchemy.sql import func
 from app.db.base import Base
+
+from .project import Project
 
 
 class User(Base):
@@ -15,4 +18,4 @@ class User(Base):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # Relationships
-    projects = relationship("Project", back_populates="owner")
+    projects: Mapped[List["Project"]] = relationship("Project", back_populates="owner")

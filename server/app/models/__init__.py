@@ -6,3 +6,4 @@ from app.db.base import Base
 from .user import User
 from .project import Project
 from .chat import Chat
+from .message import Message

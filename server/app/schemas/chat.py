@@ -1,7 +1,8 @@
-# server/app/schemas/chat.py
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+
+from app.schemas.message import Message
 
 
 class ChatBase(BaseModel):
@@ -18,15 +19,18 @@ class ChatUpdate(ChatBase):
 
 class ChatInDBBase(ChatBase):
     id: int
+    title: str
     project_id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 
     class Config:
-        from_attributes = True  # Changed from orm_mode = True for Pydantic v2
+        from_attributes = True
 
 
 class Chat(ChatInDBBase):
+    messages: List[Message] = []
+
+
+class ChatInDB(ChatInDBBase):
     pass
-    # Optionally, you can add relationships here for responses, e.g.,
-    # project: Optional[Project] = None # Requires handling circular imports or forward_refs

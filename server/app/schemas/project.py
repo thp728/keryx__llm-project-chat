@@ -1,6 +1,8 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
+
+from app.schemas.chat import Chat
 
 
 class ProjectBase(BaseModel):
@@ -29,7 +31,4 @@ class ProjectInDBBase(ProjectBase):
 
 
 class Project(ProjectInDBBase):
-    pass
-    # Optionally, you can add relationships here for responses, e.g.,
-    # owner: Optional[User] = None # Requires handling circular imports or forward_refs
-    # chats: List[Chat] = []
+    chats: List[Chat] = []
